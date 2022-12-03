@@ -4,13 +4,14 @@ from selenium import webdriver
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
+
 def wait():
     # 等待页面响应函数
     sleep(5)
 
 
 # 忽略无用的日志
-options=webdriver.ChromeOptions()
+options = webdriver.ChromeOptions()
 options.add_experimental_option("excludeSwitches", ['enable-automation', 'enable-logging'])
 
 # 打开页面
@@ -25,10 +26,14 @@ wait()
 driver.switch_to.frame(driver.find_element(By.ID, 'loginIframe'))
 
 # 从 Accounts.txt 中读取账号密码
+address = ''
 with open("Accounts.txt", 'r') as f:
     rawData = f.read()
     account = rawData.split(' ')[0]
     password = rawData.split(' ')[1]
+    isSchool = int(rawData.split(' ')[2])
+    if isSchool == 0:
+        address = rawData.split(' ')[3]
 
 # 登录教务平台
 print("\n# Step_2: 登录教务平台")
@@ -80,17 +85,29 @@ try:
     driver.find_element(By.XPATH, '//*[@id="pageBox"]/div[2]/div/table/tbody/tr[4]/td[2]/div/div[1]/div/div/div['
                                   '1]/input').click()
     wait()
-    driver.find_element(By.XPATH, '/html/body/div[last()-1]/div[1]/div[1]/ul/li[1]').click()
-    wait()
-    print('是')
+    if isSchool == 1:
+        driver.find_element(By.XPATH, '/html/body/div[last()-1]/div[1]/div[1]/ul/li[1]').click()
+        wait()
+        print('是')
 
-    print("\t- 今日在校期间是否离校？: ", end='')
-    driver.find_element(By.XPATH,
-                        '//*[@id="pageBox"]/div[2]/div/table/tbody/tr[4]/td[4]/div/div[1]/div[1]/div[1]').click()
-    wait()
-    driver.find_element(By.XPATH, '/html/body/div[last()]/div[1]/div[1]/ul/li[1]').click()
-    wait()
-    print("否，未离校")
+        print("\t- 今日在校期间是否离校？: ", end='')
+        driver.find_element(By.XPATH,
+                            '//*[@id="pageBox"]/div[2]/div/table/tbody/tr[4]/td[4]/div/div[1]/div[1]/div[1]').click()
+        wait()
+        driver.find_element(By.XPATH, '/html/body/div[last()]/div[1]/div[1]/ul/li[1]').click()
+        wait()
+        print("否，未离校")
+    else:
+        driver.find_element(By.XPATH, '/html/body/div[last()-1]/div[1]/div[1]/ul/li[2]').click()
+        wait()
+        print('否')
+        print("\t- 不在校状态:", end='')
+        driver.find_element(By.XPATH, '//*[@id="pageBox"]/div[2]/div/table/tbody/tr[6]/td[2]/div/div[1]'
+                                      '/div/div/div[1]/input').click()
+        wait()
+        driver.find_element(By.XPATH, '/html/body/div[last()]/div[1]/div[1]/ul/li[4]').click()
+        wait()
+        print('其他-在京不在校')
 
     print("\t- 本人今日体温范围: ", end='')
     driver.find_element(By.XPATH,
@@ -112,14 +129,15 @@ try:
                                   '1]/span[11] ').click()
     wait()
 
+    if isSchool == 1:
+        address = '城北街道清秀园(南区)中国石油大学润杰公寓'
     driver.find_element(By.XPATH, '//*[@id="pageBox"]/div[2]/div/table/tbody/tr[11]/td[4]/div/div[1]/div[2]/div/div[3]'
-                                  '/textarea').send_keys('城北街道清秀园(南区)中国石油大学润杰公寓')
+                                  '/textarea').send_keys(address)
     wait()
-
     driver.find_element(By.XPATH, '//*[@id="pageBox"]/div[2]/div/table/tbody/tr[11]/td[4]/div/div[1]/div['
                                   '2]/span/button[2]').click()
     wait()
-    print("城北街道清秀园(南区)中国石油大学润杰公寓")
+    print(address)
 
 
 except Exception as e:
